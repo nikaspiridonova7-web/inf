@@ -1,0 +1,435 @@
+Ничего не выбрано
+
+Перейти к содержимому
+Gmail используется с программой чтения с экрана
+1 из 8 153
+(без темы)
+Входящие
+
+Nika Spiridonova <nikaspiridonova7@gmail.com>
+Прикрепленные файлы
+10:15 (2 минуты назад)
+кому: мне
+
+ Один прикрепленный файл
+  •  Проверено на вирусы системой Gmail
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Интерактивный прототип Telegram-бота «Навигатор первокурсника»</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top, #d9f1ff 0, #f3f6fb 42%, #e8eef7 100%);
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+    .page { width: min(1180px, 100%); display: grid; grid-template-columns: 420px 1fr; gap: 28px; align-items: center; }
+    .phone {
+      width: 390px;
+      height: 790px;
+      margin: 0 auto;
+      border-radius: 42px;
+      background: #111827;
+      padding: 12px;
+      box-shadow: 0 30px 80px rgba(20, 40, 80, 0.25), inset 0 0 0 1px rgba(255,255,255,.1);
+      position: relative;
+    }
+    .screen {
+      height: 100%;
+      border-radius: 32px;
+      overflow: hidden;
+      background: #e7eef6;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .status {
+      height: 28px;
+      padding: 7px 18px 0;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      color: #111827;
+      background: #f8fbff;
+    }
+    .header {
+      height: 62px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      gap: 10px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f8df7, #63d4c9);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 20px;
+      flex: 0 0 auto;
+    }
+    .head-text { line-height: 1.15; min-width: 0; }
+    .bot-name { font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bot-status { font-size: 12px; color: #64748b; margin-top: 3px; }
+    .chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px 10px;
+      background:
+        linear-gradient(rgba(231,238,246,.92), rgba(231,238,246,.92)),
+        repeating-linear-gradient(45deg, transparent 0 14px, rgba(255,255,255,.35) 14px 15px);
+    }
+    .bubble {
+      max-width: 92%;
+      background: #ffffff;
+      border-radius: 16px 16px 16px 4px;
+      padding: 11px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 1px rgba(0,0,0,.04);
+      font-size: 14px;
+      line-height: 1.42;
+      white-space: pre-line;
+      animation: pop .12s ease-out;
+    }
+    @keyframes pop { from { transform: translateY(3px); opacity: .7; } to { transform: translateY(0); opacity: 1; } }
+    .bubble.card { border-left: 4px solid #4f8df7; }
+    .bubble.warning { border-left: 4px solid #f59e0b; }
+    .image-card {
+      height: 116px;
+      width: 92%;
+      border-radius: 18px;
+      margin: 0 0 10px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #b6d4ff, #eef7ff 52%, #b8f4e6);
+      box-shadow: 0 1px 2px rgba(0,0,0,.07);
+      display: flex;
+      align-items: flex-end;
+      padding: 12px;
+      font-weight: 800;
+      color: #17406e;
+    }
+    .quick-title { font-size: 12px; color: #64748b; margin: 10px 0 6px 2px; font-weight: 700; }
+    .buttons { display: grid; gap: 8px; margin: 6px 0 12px; }
+    button.tg-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #1864ab;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 10px;
+      cursor: pointer;
+      box-shadow: 0 1px 1px rgba(0,0,0,.04);
+      transition: transform .08s ease, background .12s ease;
+      text-align: center;
+    }
+    button.tg-btn:hover { background: #f6fbff; transform: translateY(-1px); }
+    button.tg-btn.secondary { color: #475569; }
+    button.tg-btn.danger { color: #b45309; }
+    .composer {
+      min-height: 56px;
+      background: #ffffff;
+      padding: 9px 10px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+    }
+    .composer input {
+      flex: 1;
+      border: 1px solid #dbe5f0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      outline: none;
+      font-size: 14px;
+      background: #f8fafc;
+    }
+    .send {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 0;
+      background: #4f8df7;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .side {
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, .25);
+      border-radius: 26px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(31, 41, 55, .08);
+    }
+    h1 { margin: 0 0 12px; font-size: 30px; letter-spacing: -0.03em; }
+    .side p { margin: 0 0 16px; color: #475569; font-size: 15px; line-height: 1.55; }
+    .meta { display: grid; gap: 10px; margin-top: 18px; }
+    .meta div { padding: 12px 14px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 14px; }
+    .badge { display:inline-flex; align-items:center; gap:6px; background:#e0f2fe; color:#075985; border-radius:999px; padding:6px 10px; font-weight:800; font-size:12px; margin-bottom:14px; }
+    @media (max-width: 900px) { .page { grid-template-columns: 1fr; } .side { order: -1; } }
+    @media (max-width: 470px) { body { padding: 10px; } .phone { width: 100%; height: 780px; } .side { padding: 18px; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="phone" aria-label="Телефон с прототипом Telegram-бота">
+      <div class="screen">
+        <div class="status"><span>18:14</span><span>LTE 61%</span></div>
+        <div class="header">
+          <div class="avatar">🎓</div>
+          <div class="head-text">
+            <div class="bot-name">Навигатор первокурсника</div>
+            <div class="bot-status">бот • учебный HTML-прототип</div>
+          </div>
+        </div>
+        <div class="chat" id="chat"></div>
+        <div class="composer">
+          <input id="userInput" placeholder="Написать сообщение…" onkeydown="if(event.key==='Enter') sendUnknown()" />
+          <button class="send" onclick="sendUnknown()">➤</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <span class="badge">Кликабельный прототип</span>
+      <h1>Telegram-бот «Навигатор первокурсника»</h1>
+      <p>Это интерактивная имитация работы бота: можно нажимать кнопки, переходить между разделами, возвращаться назад и проверять сценарий обратной связи.</p>
+      <p>Прототип собран по текстовой архитектуре: главное меню, подменю разделов, конечные ответы, навигация «Назад» / «Главное меню», обработка непредвиденного ввода.</p>
+      <div class="meta">
+        <div><strong>Точка входа:</strong> /start → приветствие → главное меню</div>
+        <div><strong>Разделы:</strong> расписание, корпуса, деканат, документы, студжизнь, проблемы, FAQ</div>
+        <div><strong>Проверка сценария:</strong> открой «📅 Расписание» → «Как читать расписание» → обратная связь</div>
+      </div>
+    </aside>
+  </main>
+
+<script>
+const historyStack = [];
+let currentScreen = 'start';
+
+const mainButtons = [
+  { label: '📅 Расписание', target: 'schedule' },
+  { label: '🏫 Корпуса и аудитории', target: 'campus' },
+  { label: '📞 Деканат и контакты', target: 'contacts' },
+  { label: '💸 Стипендия и документы', target: 'docs' },
+  { label: '👥 Студенческая жизнь', target: 'life' },
+  { label: '🆘 Что делать, если проблема', target: 'problems' },
+  { label: '❓ Частые вопросы', target: 'faq' }
+];
+
+const navButtons = [
+  { label: '⬅️ Назад', action: 'back' },
+  { label: '🏠 Главное меню', target: 'menu' }
+];
+
+const feedbackButtons = [
+  { label: '👍 Да', target: 'fb_yes' },
+  { label: '👎 Нет', target: 'fb_no' },
+  { label: '✏️ Хочу уточнить', target: 'fb_clarify' },
+  { label: '🏠 Главное меню', target: 'menu' }
+];
+
+function finalWithFeedback(text, title = '') {
+  return { messages: [title ? {type:'image', text:title} : null, {type:'card', text}, {type:'text', text:'Информация была полезной?'}].filter(Boolean), buttons: feedbackButtons };
+}
+function simpleFinal(text, title = '') {
+  return { messages: [title ? {type:'image', text:title} : null, {type:'card', text}].filter(Boolean), buttons: navButtons };
+}
+
+const screens = {
+  start: {
+    messages: [
+      { type:'text', text:'Команда /start' },
+      { type:'text', text:'Привет! Я помогу тебе освоиться в университете: найти расписание, корпус, контакты деканата, информацию про стипендию и студенческие активности. Выбери, что нужно прямо сейчас 👇' }
+    ],
+    buttons: mainButtons
+  },
+  menu: {
+    messages: [{ type:'text', text:'Главное меню. Выбери раздел, который нужен прямо сейчас 👇' }],
+    buttons: mainButtons
+  },
+
+  schedule: {
+    messages: [{type:'image', text:'📅 Раздел: Расписание'}, {type:'text', text:'Расписание — главный ориентир первокурсника. Здесь можно открыть актуальное расписание, узнать, как его читать, и понять, что делать при замене пары.'}],
+    buttons: [
+      { label:'Открыть расписание', target:'schedule_open' },
+      { label:'Как читать расписание', target:'schedule_read' },
+      { label:'Что делать, если пара изменилась', target:'schedule_changed' },
+      { label:'Как найти свою группу', target:'schedule_group' },
+      ...navButtons
+    ]
+  },
+  schedule_open: finalWithFeedback('Актуальное расписание лучше проверять каждый день: в первые недели оно может меняться.\n\n🔗 Ссылка: schedule.university.ru\n\nЕсли не нашёл свою группу, напиши старосте или в учебный офис.', 'Открыть расписание'),
+  schedule_read: finalWithFeedback('Номер пары показывает время занятия.\n\nАудитория — место, где проходит пара.\nКорпус — здание университета.\nЛекция — занятие для потока.\nСеминар — занятие в группе.\nПреподаватель — человек, который ведёт пару.\n\nЕсли не уверен, проверь чат группы или спроси старосту.', 'Как читать расписание'),
+  schedule_changed: finalWithFeedback('Если пара изменилась:\n\n1. Проверь расписание ещё раз.\n2. Посмотри чат группы.\n3. Проверь сообщение от старосты.\n4. Если информации нет — уточни в учебном офисе.\n\nГлавное — не паниковать: в начале семестра замены бывают часто.', 'Что делать, если пара изменилась'),
+  schedule_group: finalWithFeedback('Свою группу можно найти в приказе о зачислении, личном кабинете студента или в чате факультета.\n\nЕсли ты не уверен, напиши куратору или в учебный офис: укажи ФИО, направление и форму обучения.', 'Как найти свою группу'),
+
+  campus: {
+    messages: [{type:'image', text:'🏫 Раздел: Корпуса и аудитории'}, {type:'text', text:'Не переживай, путаться в корпусах в начале учёбы — нормально. Выбери, что нужно найти.'}],
+    buttons: [
+      { label:'Карта корпусов', target:'campus_map' },
+      { label:'Как найти аудиторию', target:'campus_room' },
+      { label:'Где вход в корпус', target:'campus_entry' },
+      { label:'Где библиотека', target:'campus_library' },
+      { label:'Где столовая', target:'campus_food' },
+      ...navButtons
+    ]
+  },
+  campus_map: simpleFinal('Здесь бот отправляет карту университета или ссылку на интерактивную карту.\n\n🔗 Карта: map.university.ru\n\nСовет: перед первой парой лучше заложить 10–15 минут на поиск корпуса.', 'Карта корпусов'),
+  campus_room: simpleFinal('Обычно в номере аудитории зашифрованы корпус и этаж, но в разных вузах правила могут отличаться.\n\nЕсли сомневаешься, спроси охрану, старосту или студентов рядом. Это нормально — все первокурсники через это проходят.', 'Как найти аудиторию'),
+  campus_entry: simpleFinal('Вход в корпус обычно отмечен на карте университета. Для прохода может понадобиться студенческий билет или пропуск.\n\nЕсли пропуск ещё не выдали, возьми паспорт и уточни правила у охраны.', 'Где вход в корпус'),
+  campus_library: simpleFinal('Библиотека находится в учебном корпусе или отдельном здании.\n\nЗдесь бот может отправить адрес, часы работы и ссылку на электронный каталог.', 'Где библиотека'),
+  campus_food: simpleFinal('Столовая и кафе обычно расположены в главных учебных корпусах.\n\nЗдесь бот может показать список точек питания, примерное время работы и способ оплаты.', 'Где столовая'),
+
+  contacts: {
+    messages: [{type:'image', text:'📞 Раздел: Деканат и контакты'}, {type:'text', text:'Здесь собраны основные контакты. Выбери ситуацию — я подскажу, куда писать или звонить.'}],
+    buttons: [
+      { label:'Контакты деканата', target:'contacts_dean' },
+      { label:'Учебный офис', target:'contacts_office' },
+      { label:'Куратор группы', target:'contacts_curator' },
+      { label:'Проблема с документами', target:'contacts_documents' },
+      { label:'Проблема с расписанием', target:'contacts_schedule' },
+      ...navButtons
+    ]
+  },
+  contacts_dean: finalWithFeedback('Карточка контакта:\n\n📍 Адрес: главный корпус, каб. 204\n🕘 Часы работы: пн–пт, 10:00–17:00\n☎️ Телефон: +7 (000) 000-00-00\n✉️ Почта: dean@university.ru\n🔗 Страница: university.ru/dean\n\nПеред визитом лучше проверить актуальный график.', 'Контакты деканата'),
+  contacts_office: finalWithFeedback('В учебный офис можно обращаться по вопросам расписания, справок, ведомостей, зачёток и организационных вопросов по учёбе.\n\nПри обращении укажи ФИО, группу и коротко опиши проблему.', 'Учебный офис'),
+  contacts_curator: finalWithFeedback('Куратор группы помогает с адаптацией, организационными вопросами и коммуникацией с университетом.\n\nЕсли не знаешь контакт куратора — спроси старосту или учебный офис.', 'Куратор группы'),
+  contacts_documents: finalWithFeedback('С документами чаще всего помогают деканат или учебный офис.\n\nШаблон обращения:\n«Здравствуйте! Я студент(ка) 1 курса, группа ____. Подскажите, пожалуйста, как решить вопрос с _____.»', 'Проблема с документами'),
+  contacts_schedule: finalWithFeedback('Если проблема с расписанием, сначала проверь актуальную версию на сайте и чат группы.\n\nЕсли ошибка сохраняется — напиши старосте или в учебный офис.', 'Проблема с расписанием'),
+
+  docs: {
+    messages: [{type:'image', text:'💸 Раздел: Стипендия и документы'}, {type:'text', text:'В этом разделе — всё, что связано со стипендией, справками и базовыми документами. Для точных сроков всегда проверяй официальный сайт университета.'}],
+    buttons: [
+      { label:'Какие бывают стипендии', target:'docs_scholarships' },
+      { label:'Когда приходит стипендия', target:'docs_payday' },
+      { label:'Как получить справку', target:'docs_certificate' },
+      { label:'Где взять студенческий билет', target:'docs_student_card' },
+      { label:'Что делать, если потерял пропуск', target:'docs_lost_pass' },
+      ...navButtons
+    ]
+  },
+  docs_scholarships: finalWithFeedback('Основные виды стипендий:\n\n💸 Академическая — за успешную учёбу.\n🤝 Социальная — для студентов с подтверждённым правом на поддержку.\n⭐ Повышенная — за достижения в учёбе, науке, спорте или общественной жизни.\n🏅 Именная — по отдельным конкурсам и программам.\n\nТочные условия смотри на сайте университета.', 'Какие бывают стипендии'),
+  docs_payday: finalWithFeedback('Сроки выплат устанавливает университет. Обычно информацию публикуют на официальном сайте или в личном кабинете.\n\nЕсли выплата не пришла, уточни в бухгалтерии, деканате или учебном офисе.', 'Когда приходит стипендия'),
+  docs_certificate: finalWithFeedback('Как получить справку:\n\n1. Выбери тип справки.\n2. Обратись в нужный отдел или оставь заявку онлайн.\n3. Укажи ФИО, группу и цель справки.\n4. Дождись готовности.\n\nЛучше уточнить срок изготовления заранее.', 'Как получить справку'),
+  docs_student_card: finalWithFeedback('Студенческий билет обычно выдают в деканате или учебном офисе после зачисления.\n\nЕсли его ещё не выдали, уточни у старосты или куратора, когда будет выдача.', 'Где взять студенческий билет'),
+  docs_lost_pass: finalWithFeedback('Если потерял пропуск:\n\n1. Сообщи в деканат или учебный офис.\n2. Уточни, нужно ли заявление.\n3. Возьми паспорт для временного прохода.\n4. Узнай срок восстановления.\n\nЕсли пропуск нужен срочно, предупреди охрану и старосту.', 'Что делать, если потерял пропуск'),
+
+  life: {
+    messages: [{type:'image', text:'👥 Раздел: Студенческая жизнь'}, {type:'text', text:'Хочешь быстрее влиться в университетскую жизнь? Здесь можно найти клубы, мероприятия и сообщества, где легко познакомиться с людьми.'}],
+    buttons: [
+      { label:'Студенческие клубы', target:'life_clubs' },
+      { label:'Спорт и секции', target:'life_sport' },
+      { label:'Волонтёрство', target:'life_volunteer' },
+      { label:'Мероприятия', target:'life_events' },
+      { label:'Где искать новости', target:'life_news' },
+      ...navButtons
+    ]
+  },
+  life_clubs: simpleFinal('В университете могут быть клубы по разным направлениям:\n\n🎬 медиа\n🔬 наука\n💃 танцы\n🎭 театр\n🗣 дебаты\n🚀 предпринимательство\n💻 IT\n🎨 дизайн\n\nЗдесь бот может дать ссылку на страницу или чат клубов.', 'Студенческие клубы'),
+  life_sport: simpleFinal('Спорт и секции помогают быстрее познакомиться с людьми и держать режим.\n\nЗдесь бот может показать список секций, расписание тренировок и контакты спортивного отдела.', 'Спорт и секции'),
+  life_volunteer: simpleFinal('Волонтёрство — хороший способ попасть в активную студенческую среду.\n\nМожно помогать на мероприятиях, форумах, днях открытых дверей и социальных проектах.', 'Волонтёрство'),
+  life_events: simpleFinal('Мероприятия ищи в официальных каналах университета, факультета и студсовета.\n\nСовет: в первые месяцы сходи хотя бы на 1–2 события — так проще найти своих людей.', 'Мероприятия'),
+  life_news: simpleFinal('Новости лучше искать здесь:\n\n🔗 официальный сайт университета\n📣 Telegram-канал университета\n📣 канал факультета\n👥 канал студсовета\n💬 чат группы\n\nТак ты не пропустишь важные дедлайны и события.', 'Где искать новости'),
+
+  problems: {
+    messages: [{type:'image', text:'🆘 Раздел: Что делать, если проблема'}, {type:'text', text:'Если что-то пошло не так — это решаемо. Выбери ситуацию, и я подскажу первый шаг.'}],
+    buttons: [
+      { label:'Опоздал на пару', target:'problem_late' },
+      { label:'Не могу найти аудиторию', target:'problem_room' },
+      { label:'Потерял пропуск/студенческий', target:'problem_pass' },
+      { label:'Конфликт или сложная ситуация', target:'problem_conflict' },
+      { label:'Плохо себя чувствую', target:'problem_health' },
+      ...navButtons
+    ]
+  },
+  problem_late: finalWithFeedback('Если опоздал на пару:\n\n1. Спокойно зайди в аудиторию.\n2. Извинись без долгих объяснений.\n3. После пары уточни у преподавателя, нужно ли что-то дополнительно сделать.\n\nОдно опоздание — не катастрофа, но лучше не превращать это в привычку.', 'Опоздал на пару'),
+  problem_room: finalWithFeedback('Если не можешь найти аудиторию:\n\n1. Проверь корпус и номер аудитории в расписании.\n2. Спроси охрану или студентов рядом.\n3. Напиши старосте в чат группы.\n\nЛучше написать сразу, чем молча опоздать.', 'Не могу найти аудиторию'),
+  problem_pass: finalWithFeedback('Если потерял пропуск или студенческий:\n\n1. Сообщи в деканат/учебный офис.\n2. Уточни, где подать заявление.\n3. Для входа в корпус возьми паспорт.\n4. Следи за сроками восстановления.', 'Потерял пропуск/студенческий'),
+  problem_conflict: finalWithFeedback('Если возник конфликт или сложная ситуация:\n\n1. Зафиксируй, что произошло.\n2. Не решай вопрос в эмоциях.\n3. Обратись к куратору, старосте, в деканат или психологическую службу.\n\nПросить помощи — нормально.', 'Конфликт или сложная ситуация'),
+  problem_health: finalWithFeedback('Если тебе плохо:\n\n1. Обратись в медпункт или к сотруднику университета рядом.\n2. Сообщи старосте или одногруппнику, где ты находишься.\n3. При острой ситуации звони 112.\n\nЗдоровье важнее пары.', 'Плохо себя чувствую'),
+
+  faq: {
+    messages: [{type:'image', text:'❓ Раздел: Частые вопросы'}, {type:'text', text:'Здесь собраны короткие ответы на типичные вопросы первокурсников.'}],
+    buttons: [
+      { label:'Можно ли пропускать пары?', target:'faq_skip' },
+      { label:'Что такое зачётная неделя?', target:'faq_credit_week' },
+      { label:'Чем семинар отличается от лекции?', target:'faq_seminar' },
+      { label:'Кто такой староста?', target:'faq_monitor' },
+      { label:'Что делать, если не понял тему?', target:'faq_topic' },
+      ...navButtons
+    ]
+  },
+  faq_skip: simpleFinal('Пропускать пары без причины не стоит. Пропуски могут повлиять на допуск, оценку или отношения с преподавателем.\n\nЕсли пропуск по уважительной причине — уточни, какие документы нужны.', 'Можно ли пропускать пары?'),
+  faq_credit_week: simpleFinal('Зачётная неделя — период в конце семестра, когда студенты закрывают зачёты, долги и получают допуски к экзаменам.\n\nЛучше не оставлять всё на последний день.', 'Что такое зачётная неделя?'),
+  faq_seminar: simpleFinal('Лекция — преподаватель объясняет тему для большого потока.\n\nСеминар — занятие в группе: обсуждение, практика, ответы, задания.', 'Чем семинар отличается от лекции?'),
+  faq_monitor: simpleFinal('Староста помогает группе получать организационную информацию, передаёт сообщения от преподавателей и может подсказать, куда обратиться.', 'Кто такой староста?'),
+  faq_topic: simpleFinal('Если не понял тему:\n\n1. Пересмотри материалы занятия.\n2. Спроси одногруппников.\n3. Подойди к преподавателю после пары.\n4. Найди дополнительные материалы.\n\nЛучше уточнить сразу, чем копить непонимание.', 'Что делать, если не понял тему?'),
+
+  fb_yes: { messages: [{type:'text', text:'Отлично! Рад, что помог. Можешь вернуться в главное меню или выбрать следующий вопрос.'}], buttons: [{label:'🏠 Главное меню', target:'menu'}, {label:'⬅️ Назад', action:'back'}] },
+  fb_no: { messages: [{type:'text', text:'Понял. Тогда лучше уточнить вопрос у старосты, куратора или в деканате. Я могу показать нужные контакты.'}], buttons: [{label:'Открыть контакты', target:'contacts'}, {label:'🏠 Главное меню', target:'menu'}] },
+  fb_clarify: { messages: [{type:'text', text:'Напиши вопрос коротко, а я подскажу, в какой раздел лучше перейти или к кому обратиться.'}], buttons: [{label:'📞 Контакты', target:'contacts'}, {label:'❓ Частые вопросы', target:'faq'}, {label:'🏠 Главное меню', target:'menu'}] },
+  unknown: { messages: [{type:'text', text:'Я пока не понял запрос. Попробуй выбрать раздел из меню — так я точно смогу помочь. Если хочешь начать сначала, нажми “Главное меню”.'}], buttons: [{label:'🏠 Главное меню', target:'menu'}, {label:'❓ Частые вопросы', target:'faq'}, {label:'📞 Контакты', target:'contacts'}] }
+};
+
+function renderMessage(msg) {
+  if (msg.type === 'image') return `<div class="image-card">${msg.text}</div>`;
+  const cls = msg.type === 'card' ? 'bubble card' : msg.type === 'warning' ? 'bubble warning' : 'bubble';
+  return `<div class="${cls}">${escapeHtml(msg.text)}</div>`;
+}
+function renderButtons(buttons) {
+  if (!buttons || !buttons.length) return '';
+  return `<div class="quick-title">Кнопки бота</div><div class="buttons">${buttons.map(btn => `<button class="tg-btn ${btn.action === 'back' ? 'secondary' : ''}" onclick="handleButton('${btn.action || 'go'}','${btn.target || ''}')">${btn.label}</button>`).join('')}</div>`;
+}
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+}
+function go(screenId, push = true) {
+  if (!screens[screenId]) screenId = 'unknown';
+  if (push && currentScreen && currentScreen !== screenId) historyStack.push(currentScreen);
+  currentScreen = screenId;
+  const screen = screens[screenId];
+  const chat = document.getElementById('chat');
+  chat.innerHTML = screen.messages.map(renderMessage).join('') + renderButtons(screen.buttons);
+  chat.scrollTop = 0;
+}
+function handleButton(action, target) {
+  if (action === 'back') {
+    const prev = historyStack.pop() || 'menu';
+    currentScreen = prev;
+    const screen = screens[prev];
+    const chat = document.getElementById('chat');
+    chat.innerHTML = screen.messages.map(renderMessage).join('') + renderButtons(screen.buttons);
+    return;
+  }
+  go(target, true);
+}
+function sendUnknown() {
+  const input = document.getElementById('userInput');
+  input.value = '';
+  go('unknown', true);
+}
+
+go('start', false);
+</script>
+</body>
+</html>
+Интерактивный_HTML_прототип_Навигатор_первокурсника_v2.html
+Отображается файл "Интерактивный_HTML_прототип_Навигатор_первокурсника_v2.html"
